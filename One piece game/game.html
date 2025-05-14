@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>One Piece Pirate Crew Builder</title>
+  <style>
+    body {
+      font-family: 'Hachi Maru Pop', sans-serif;
+      text-align: center;
+      padding: 20px;
+      color: #333;
+    }
+
+    h1 {
+      font-size: 3rem;
+      color: #d32f2f;
+      margin-bottom: 20px;
+    }
+
+    .character-card {
+      border: 2px solid #ff9800;
+      background-color: #ffffff;
+      padding: 20px;
+      margin: 20px auto;
+      width: 320px;
+      border-radius: 15px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+      transition: transform 0.2s ease;
+    }
+
+    .character-card:hover {
+      transform: scale(1.05);
+    }
+
+    .character-image {
+      width: 150px;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 10px;
+      object-position: top;
+    }
+
+    button {
+      margin: 5px;
+      padding: 15px 30px;
+      font-size: 16px;
+      border: 2px solid #ff9800;
+      border-radius: 10px;
+      background-color: #ff5722;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #e64a19;
+    }
+
+    .role-buttons {
+      margin-top: 20px;
+    }
+
+    .role-buttons button {
+      background-color: #2196f3;
+      border: 1px solid #1976d2;
+    }
+
+    .role-buttons button:hover {
+      background-color: #1976d2;
+    }
+
+    .crew-list {
+      margin-top: 40px;
+    }
+
+    .crew-list h2 {
+      font-size: 2rem;
+      color: #3e2723;
+    }
+
+    .crew-list ul {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    .crew-list li {
+      background-color: #ffffff;
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #ff9800;
+      font-size: 1.1rem;
+      color: #333;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .crew-list li .efficiency {
+      font-weight: bold;
+      color: #d32f2f;
+    }
+
+    .rating-section {
+      margin-top: 20px;
+      font-size: 1.5rem;
+      color: #388e3c;
+      font-weight: bold;
+    }
+
+    .icon {
+      width: 30px;
+      height: 30px;
+      margin-left: 10px;
+    }
+
+    .background {
+      background-image: url('https://i.imgur.com/Edgn6R0.png');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: -1;
+    }
+  </style>
+</head>
+<body>
+  <h1>One Piece Pirate Crew Builder</h1>
+  <div class="character-card" id="characterCard"></div>
+  <div class="role-buttons" id="roleButtons"></div>
+  <button onclick="skipCharacter()">Skip (1 Time Use)</button>
+
+  <div class="crew-list" id="crewList">
+    <h2>Your Crew</h2>
+    <ul id="crew"></ul>
+  </div>
+
+  <button onclick="rateCrew()">Finish and Rate Crew</button>
+  <button onclick="restartGame()">Restart</button>
+  <h2 id="rating"></h2>
+
+  <script>
+    const roles = ['Captain', 'Vice Captain', 'Swordsman', 'Cook', 'Navigator', 'Sniper', 'Doctor', 'Archaeologist', 'Shipwright', 'Musician', 'Lookout', 'Helmsman', 'Support'];
+
+    const characters = [
+        {
+        'name': 'Monkey D. Luffy',
+        'image': 'images/luffy.jpg',
+        'stats': {
+            'Captain': 10,
+            'Vice Captain': 2,
+            'Swordsman': 1,
+            'Cook': 1,
+            'Navigator': 1,
+            'Sniper': 2,
+            'Doctor': 1,
+            'Archaeologist': 1,
+            'Shipwright': 2,
+            'Musician': 1,
+            'Lookout': 6,
+            'Helmsman': 3,
+            'Support': 10
+        }
+      },
+        {
+        'name': 'Roronoa Zoro',
+        'image': 'images/zoro.jpg',
+        'stats': {
+            'Captain': 3,
+            'Vice Captain': 10,
+            'Swordsman': 10,
+            'Cook': 1,
+            'Navigator': 0,
+            'Sniper': 1,
+            'Doctor': 1,
+            'Archaeologist': 1,
+            'Shipwright': 2,
+            'Musician': 1,
+            'Lookout': 5,
+            'Helmsman': 2,
+            'Support': 9,
+        }
+      },
+        {
+        'name': 'Nami',
+        'image': 'images/nami.webp',
+        'stats': {
+            'Captain': 3,
+            'Vice Captain': 4,
+            'Swordsman': 1,
+            'Cook': 2,
+            'Navigator': 10,
+            'Sniper': 2,
+            'Doctor': 1,
+            'Archaeologist': 5,
+            'Shipwright': 3,
+            'Musician': 1,
+            'Lookout': 6,
+            'Helmsman': 6,
+            'Support': 5
+        }
+      },
+        {
+        'name': 'Usopp',
+        'image': 'images/usopp.jpg',
+        'stats': {
+            'Captain': 2,
+            'Vice Captain': 3,
+            'Swordsman': 1,
+            'Cook': 1,
+            'Navigator': 2,
+            'Sniper': 10,
+            'Doctor': 1,
+            'Archaeologist': 2,
+            'Shipwright': 2,
+            'Musician': 2,
+            'Lookout': 7,
+            'Helmsman': 5,
+            'Support': 4
+        }
+      },
+        {
+        'name': 'Sanji',
+        'image': 'images/sanji.avif',
+        'stats': {
+            'Captain': 3,
+            'Vice Captain': 5,
+            'Swordsman': 5,
+            'Cook': 10,
+            'Navigator': 2,
+            'Sniper': 1,
+            'Doctor': 2,
+            'Archaeologist': 1,
+            'Shipwright': 2,
+            'Musician': 1,
+            'Lookout': 4,
+            'Helmsman': 6,
+            'Support': 8
+        }
+      },
+        {
+        'name': 'Tony Tony Chopper',
+        'image': 'images/chopper.webp',
+        'stats': {
+            'Captain': 1,
+            'Vice Captain': 2,
+            'Swordsman': 2,
+            'Cook': 2,
+            'Navigator': 3,
+            'Sniper': 1,
+            'Doctor': 10,
+            'Archaeologist': 2,
+            'Shipwright': 2,
+            'Musician': 1,
+            'Lookout': 5,
+            'Helmsman': 5,
+            'Support': 3
+        }
+      },
+        {
+        'name': 'Nico Robin',
+        'image': 'images/robin.avif',
+        'stats': {
+            'Captain': 3,
+            'Vice Captain': 4,
+            'Swordsman': 2,
+            'Cook': 1,
+            'Navigator': 3,
+            'Sniper': 2,
+            'Doctor': 1,
+            'Archaeologist': 10,
+            'Shipwright': 2,
+            'Musician': 1,
+            'Lookout': 6,
+            'Helmsman': 5,
+            'Support': 7
+        }
+      },
+        {
+        'name': 'Franky',
+        'image': 'images/franky.webp',
+        'stats': {
+            'Captain': 2,
+            'Vice Captain': 3,
+            'Swordsman': 3,
+            'Cook': 1,
+            'Navigator': 2,
+            'Sniper': 3,
+            'Doctor': 2,
+            'Archaeologist': 2,
+            'Shipwright': 10,
+            'Musician': 1,
+            'Lookout': 5,
+            'Helmsman': 6,
+            'Support': 8
+        }
+      },
+        {
+        'name': 'Brook',
+        'image': 'images/brook.webp',
+        'stats': {
+            'Captain': 2,
+            'Vice Captain': 2,
+            'Swordsman': 7,
+            'Cook': 1,
+            'Navigator': 2,
+            'Sniper': 2,
+            'Doctor': 1,
+            'Archaeologist': 2,
+            'Shipwright': 1,
+            'Musician': 10,
+            'Lookout': 6,
+            'Helmsman': 5,
+            'Support': 6
+        }
+      },
+        {
+        'name': 'Jinbe',
+        'image': 'images/jinbe.webp',
+        'stats': {
+            'Captain': 4,
+            'Vice Captain': 8,
+            'Swordsman': 6,
+            'Cook': 2,
+            'Navigator': 4,
+            'Sniper': 1,
+            'Doctor': 2,
+            'Archaeologist': 2,
+            'Shipwright': 3,
+            'Musician': 1,
+            'Lookout': 5,
+            'Helmsman': 10,
+            'Support': 8
+        }
+      },
+        {
+        'name': 'Trafalgar D. Water Law',
+        'image': 'images/law.avif',
+        'stats': {
+          'Captain': 9,
+          'Vice Captain': 3,
+          'Swordsman': 4,
+          'Cook': 1,
+          'Navigator': 3,
+          'Sniper': 3,
+          'Doctor': 10,
+          'Archaeologist': 1,
+          'Shipwright': 2,
+          'Musician': 1,
+          'Lookout': 5,
+          'Helmsman': 3,
+          'Support': 8
+        }
+      },
+        {
+        'name': 'Eustass Kid',
+        'image': 'images/kid.webp',
+        'stats': {
+          'Captain': 9,
+          'Vice Captain': 2,
+          'Swordsman': 4,
+          'Cook': 1,
+          'Navigator': 3,
+          'Sniper': 3,
+          'Doctor': 1,
+          'Archaeologist': 1,
+          'Shipwright': 5,
+          'Musician': 1,
+          'Lookout': 4,
+          'Helmsman': 2,
+          'Support': 5
+        }
+      },
+        {
+        'name': 'Killer',
+        'image': 'images/killer.jpg',
+        'stats': {
+          'Captain': 3,
+          'Vice Captain': 8,
+          'Swordsman': 9,
+          'Cook': 1,
+          'Navigator': 2,
+          'Sniper': 4,
+          'Doctor': 1,
+          'Archaeologist': 1,
+          'Shipwright': 2,
+          'Musician': 1,
+          'Lookout': 6,
+          'Helmsman': 2,
+          'Support': 6
+        }
+      },
+        {
+        'name': 'Jewelry Bonney',
+        'image': 'images/bonney.avif',
+        'stats': {
+          'Captain': 8,
+          'Vice Captain': 3,
+          'Swordsman': 3,
+          'Cook': 6,
+          'Navigator': 4,
+          'Sniper': 2,
+          'Doctor': 3,
+          'Archaeologist': 1,
+          'Shipwright': 1,
+          'Musician': 1,
+          'Lookout': 5,
+          'Helmsman': 3,
+          'Support': 7
+        }
+      },
+        {
+        'name': 'Capone "Gang" Bege',
+        'image': 'images/bege.jpg',
+        'stats': {
+          'Captain': 8,
+          'Vice Captain': 3,
+          'Swordsman': 2,
+          'Cook': 1,
+          'Navigator': 3,
+          'Sniper': 4,
+          'Doctor': 1,
+          'Archaeologist': 1,
+          'Shipwright': 3,
+          'Musician': 1,
+          'Lookout': 5,
+          'Helmsman': 2,
+          'Support': 7
+        }
+      },
+        {
+        'name': 'X Drake',
+        'image': 'images/drake.avif',
+        'stats': {
+          'Captain': 7,
+          'Vice Captain': 4,
+          'Swordsman': 6,
+          'Cook': 1,
+          'Navigator': 3,
+          'Sniper': 3,
+          'Doctor': 2,
+          'Archaeologist': 1,
+          'Shipwright': 2,
+          'Musician': 1,
+          'Lookout': 6,
+          'Helmsman': 3,
+          'Support': 6
+        }
+      },
+        {
+        'name': 'Basil Hawkins',
+        'image': 'images/hawkins.webp',
+        'stats': {
+          'Captain': 7,
+          'Vice Captain': 3,
+          'Swordsman': 3,
+          'Cook': 1,
+          'Navigator': 4,
+          'Sniper': 2,
+          'Doctor': 3,
+          'Archaeologist': 2,
+          'Shipwright': 2,
+          'Musician': 1,
+          'Lookout': 5,
+          'Helmsman': 2,
+          'Support': 6
+        }
+      },
+        {
+        'name': 'Scratchmen Apoo',
+        'image': 'images/apoo.webp',
+        'stats': {
+          'Captain': 7,
+          'Vice Captain': 3,
+          'Swordsman': 2,
+          'Cook': 1,
+          'Navigator': 3,
+          'Sniper': 3,
+          'Doctor': 1,
+          'Archaeologist': 1,
+          'Shipwright': 2,
+          'Musician': 10,
+          'Lookout': 5,
+          'Helmsman': 2,
+          'Support': 6
+        }
+      },
+        {
+        'name': 'Urouge',
+        'image': 'images/urouge.webp',
+        'stats': {
+          'Captain': 8,
+          'Vice Captain': 2,
+          'Swordsman': 4,
+          'Cook': 1,
+          'Navigator': 2,
+          'Sniper': 2,
+          'Doctor': 3,
+          'Archaeologist': 1,
+          'Shipwright': 2,
+          'Musician': 1,
+          'Lookout': 5,
+          'Helmsman': 3,
+          'Support': 6
+        }
+      },
+        {
+        'name': 'Shanks',
+        'image': 'images/shanks.avif',
+        'stats': {
+          'Captain': 10,
+          'Vice Captain': 8,
+          'Swordsman': 9,
+          'Cook': 1,
+          'Navigator': 5,
+          'Sniper': 4,
+          'Doctor': 2,
+          'Archaeologist': 1,
+          'Shipwright': 4,
+          'Musician': 1,
+          'Lookout': 7,
+          'Helmsman': 6,
+          'Support': 9
+        }
+      },
+        {
+        'name': 'Marshall D. Teach',
+        'image': 'images/blackbeard.webp',
+        'stats': {
+          'Captain': 9,
+          'Vice Captain': 3,
+          'Swordsman': 4,
+          'Cook': 1,
+          'Navigator': 4,
+          'Sniper': 3,
+          'Doctor': 2,
+          'Archaeologist': 2,
+          'Shipwright': 2,
+          'Musician': 1,
+          'Lookout': 6,
+          'Helmsman': 3,
+          'Support': 8
+        }
+      },
+        {
+        'name': 'Buggy the Clown',
+        'image': 'images/buggy.avif',
+        'stats': {
+          'Captain': 6,
+          'Vice Captain': 2,
+          'Swordsman': 2,
+          'Cook': 1,
+          'Navigator': 4,
+          'Sniper': 5,
+          'Doctor': 1,
+          'Archaeologist': 1,
+          'Shipwright': 2,
+          'Musician': 1,
+          'Lookout': 6,
+          'Helmsman': 2,
+          'Support': 9
+        }
+      },
+        {
+        'name': 'Kaido',
+        'image': 'images/kaido.webp',
+        'stats': {
+          'Captain': 10,
+          'Vice Captain': 7,
+          'Swordsman': 8,
+          'Cook': 1,
+          'Navigator': 2,
+          'Sniper': 3,
+          'Doctor': 1,
+          'Archaeologist': 1,
+          'Shipwright': 4,
+          'Musician': 1,
+          'Lookout': 6,
+          'Helmsman': 5,
+          'Support': 9
+        }
+      },
+        {
+        'name': 'Charlotte Linlin',
+        'image': 'images/bigmom.webp',
+        'stats': {
+          'Captain': 10,
+          'Vice Captain': 3,
+          'Swordsman': 5,
+          'Cook': 8,
+          'Navigator': 4,
+          'Sniper': 2,
+          'Doctor': 2,
+          'Archaeologist': 1,
+          'Shipwright': 4,
+          'Musician': 2,
+          'Lookout': 5,
+          'Helmsman': 4,
+          'Support': 8
+        }
+      },
+        {
+        'name': 'Edward Newgate',
+        'image': 'images/whitebeard.webp',
+        'stats': {
+          'Captain': 10,
+          'Vice Captain': 5,
+          'Swordsman': 7,
+          'Cook': 2,
+          'Navigator': 3,
+          'Sniper': 3,
+          'Doctor': 2,
+          'Archaeologist': 1,
+          'Shipwright': 4,
+          'Musician': 1,
+          'Lookout': 6,
+          'Helmsman': 5,
+          'Support': 10
+        }
+      }
+    ];
+
+    let crew = {};
+    let usedSkip = false;
+    let currentCharacter = null;
+
+    function getRandomCharacter() {
+      const index = Math.floor(Math.random() * characters.length);
+      currentCharacter = characters.splice(index, 1)[0];
+      displayCharacter();
+    }
+
+    function displayCharacter() {
+      if (!currentCharacter) return;
+      const characterCard = document.getElementById('characterCard');
+      characterCard.innerHTML = `
+        <h3>${currentCharacter.name}</h3>
+        <img src="${currentCharacter.image}" alt="${currentCharacter.name}" class="character-image"/>
+      `;
+      displayRoleButtons();
+    }
+
+    function displayRoleButtons() {
+      const container = document.getElementById('roleButtons');
+      container.innerHTML = '';
+      for (const role of roles) {
+        if (!crew[role]) {
+          const button = document.createElement('button');
+          button.textContent = role;
+          button.onclick = () => assignRole(role);
+          container.appendChild(button);
+        }
+      }
+    }
+
+    function assignRole(role) {
+      const efficiency = currentCharacter.stats[role] || 0;
+      crew[role] = { name: currentCharacter.name, role, efficiency, image: currentCharacter.image };
+      updateCrewDisplay();
+
+      if (Object.keys(crew).length === roles.length) {
+        document.getElementById('roleButtons').innerHTML = 'Crew complete! Click below to rate.';
+        document.getElementById('characterCard').innerHTML = '';
+      } else {
+        getRandomCharacter();
+      }
+    }
+
+    function skipCharacter() {
+      if (usedSkip) {
+        alert("You've already used your skip!");
+        return;
+      }
+      usedSkip = true;
+      getRandomCharacter();
+    }
+
+    function updateCrewDisplay() {
+      const crewList = document.getElementById('crew');
+      crewList.innerHTML = '';
+      for (const role in crew) {
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <img src="${crew[role].image}" alt="${crew[role].name}" class="character-image" style="width: 40px; height: 40px; margin-right: 10px;"/>
+          ${crew[role].name} - ${role} 
+          <span class="efficiency">(Efficiency: ${crew[role].efficiency})</span>
+        `;
+        crewList.appendChild(li);
+      }
+    }
+
+    function rateCrew() {
+      if (Object.keys(crew).length !== roles.length) {
+        alert('You need to assign one character to each role before rating!');
+        return;
+      }
+      let total = 0;
+      let count = 0;
+      for (const role in crew) {
+        total += crew[role].efficiency;
+        count++;
+      }
+      const average = (total / count).toFixed(2);
+      document.getElementById('rating').textContent = `Crew Rating: ${average}/10`;
+    }
+
+    function restartGame() {
+      location.reload(); 
+    }
+
+    getRandomCharacter();
+  </script>
+</body>
+</html>
